@@ -17,6 +17,10 @@ jobs:
           repository : anuragkanwar/docus
           fetch-depth : 0
           path : "./docus"
+      - name : Node
+        uses : actions/setup-node@v4
+        with :
+          node-version: "20"
       - name: Build and Run React App
         run: |
           ls
@@ -24,9 +28,16 @@ jobs:
           npm install
           npm run build
           npm serve --no-open
+      - name : Go
+        uses: "actions/setup-go@v5"
+        with:
+          go-version: '>=1.17.0'
+      - run: go version
+
       - name: Build and Run Go Server
         run: |
           cd go-sc
+          go mod download all
           go build -o App
           ./app http://localhost:3000/sitemap.xml ./js.json
 
