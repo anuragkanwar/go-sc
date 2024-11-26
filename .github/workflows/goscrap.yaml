@@ -1,8 +1,14 @@
 name : Run Go and Docusaurus
 
 on:
-  workflow_call
+  workflow_call:
+    inputs:
+      targetRepo:
+        description: Target Docs repository
+        type: string
+        required: true
 
+    # secrets:
 jobs:
   build-and-run:
     runs-on : ubuntu-latest
