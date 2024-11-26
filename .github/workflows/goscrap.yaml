@@ -11,12 +11,15 @@ jobs:
         with :
           repository : anuragkanwar/go-sc
           fetch-depth : 0
+          path : "./go-sc"
       - uses: actions/checkout@v4
         with :
           repository : anuragkanwar/docus
           fetch-depth : 0
+          path : "./docus"
       - name: Build and Run React App
         run: |
+          ls
           cd docus
           npm install
           npm run build
