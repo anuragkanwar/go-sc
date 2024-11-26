@@ -27,7 +27,7 @@ jobs:
           cd docus
           npm install
           npm run build
-          npm serve --no-open
+          npm run serve --no-open
       - name : Go
         uses: "actions/setup-go@v5"
         with:
