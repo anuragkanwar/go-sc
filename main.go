@@ -19,7 +19,7 @@ func main() {
 	filePath := os.Args[2]
 	fmt.Println(sitemapPath)
 	result := make([]string, 0)
-	err := sitemap.ParseIndexFromSite(sitemapPath, func(e sitemap.IndexEntry) error {
+	err := sitemap.ParseFromSite(sitemapPath, func(e sitemap.Entry) error {
 		result = append(result, e.GetLocation())
 		return nil
 	})
