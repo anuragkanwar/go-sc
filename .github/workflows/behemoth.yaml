@@ -1,0 +1,46 @@
+name : Main Workflow
+on:
+  workflow_dispatch
+
+jobs:
+  initJob:
+    uses : ./goscrap.yaml
+    with:
+      targetRepo: anuragkanwar/docus
+
+  p1:
+    needs: initJob
+    uses : ./goscrap.yaml
+    with:
+      targetRepo: anuragkanwar/docus
+  p2:
+    needs : initJob
+    uses : ./goscrap.yaml
+    with:
+      targetRepo: anuragkanwar/docus
+  p3:
+    needs : initJob
+    uses : ./goscrap.yaml
+    with:
+      targetRepo: anuragkanwar/docus
+  p4:
+    needs: initJob
+    uses : ./goscrap.yaml
+    with:
+      targetRepo: anuragkanwar/docus
+  p5:
+    needs : initJob
+    uses : ./goscrap.yaml
+    with:
+      targetRepo: anuragkanwar/docus
+  p6:
+    needs : initJob
+    uses : ./goscrap.yaml
+    with:
+      targetRepo: anuragkanwar/docus
+
+  final_job:
+    needs : [p1, p2, p3, p4, p5, p6]
+    uses : ./goscrap.yaml
+    with:
+      targetRepo : anuragkanwar/docus

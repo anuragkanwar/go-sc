@@ -1,7 +1,7 @@
 name : Run Go and Docusaurus
 
 on:
-  workflow_dispatch
+  workflow_call
 
 jobs:
   build-and-run:
@@ -14,7 +14,7 @@ jobs:
           path : "./go-sc"
       - uses: actions/checkout@v4
         with :
-          repository : anuragkanwar/docus
+          repository : ${{ inputs.targetRepo }}
           fetch-depth : 0
           path : "./docus"
       - name : Node
