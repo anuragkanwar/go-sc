@@ -27,11 +27,11 @@ jobs:
           cd docus
           npm install
           npm run build
-          npm run serve --no-open
+          npm run serve --no-open &
       - name : Go
         uses: "actions/setup-go@v5"
         with:
-          go-version: '>=1.17.0'
+          go-version: '1.23.3'
       - run: go version
 
       - name: Build and Run Go Server
