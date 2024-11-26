@@ -1,0 +1,29 @@
+name : Run Go and Docusaurus
+
+on:
+  workflow_dispatch
+
+jobs:
+  build-and-run:
+    runs-on : ubuntu-latest
+    steps:
+      - uses : actions/checkout@v4
+        with :
+          repository : anuragkanwar/go-sc
+          fetch-depth : 0
+      - uses: actions/checkout@v4
+        with :
+          repository : anuragkanwar/docus
+          fetch-depth : 0
+      - name: Build and Run React App
+        run: |
+          cd docus
+          npm install
+          npm run build
+          npm serve --no-open
+      - name: Build and Run Go Server
+        run: |
+          cd go-sc
+          go build -o App
+          ./app http://localhost:3000/sitemap.xml ./js.json
+
