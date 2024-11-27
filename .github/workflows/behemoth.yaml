@@ -7,40 +7,73 @@ jobs:
     uses : ./.github/workflows/goscrap.yaml
     with:
       targetRepo: anuragkanwar/docus
+      sitemapPath: http://localhost:3000/sitemap.xml
+      configPath: ./js.json
+    secrets:
+      apiKey: ${{ secrets.API_KEY }}
 
   p1:
     needs: initJob
     uses : ./.github/workflows/goscrap.yaml
     with:
       targetRepo: anuragkanwar/docus
+      sitemapPath: http://localhost:3000/sitemap.xml
+      configPath: ./js.json
+    secrets:
+      apiKey: ${{ secrets.API_KEY }}
   p2:
     needs : initJob
     uses : ./.github/workflows/goscrap.yaml
     with:
       targetRepo: anuragkanwar/docus
+      sitemapPath: http://localhost:3000/sitemap.xml
+      configPath: ./js.json
+    secrets:
+      apiKey: ${{ secrets.API_KEY }}
   p3:
     needs : initJob
     uses : ./.github/workflows/goscrap.yaml
     with:
       targetRepo: anuragkanwar/docus
+      sitemapPath: http://localhost:3000/sitemap.xml
+      configPath: ./js.json
+    secrets:
+      apiKey: ${{ secrets.API_KEY }}
   p4:
     needs: initJob
     uses : ./.github/workflows/goscrap.yaml
     with:
       targetRepo: anuragkanwar/docus
+      sitemapPath: http://localhost:3000/sitemap.xml
+      configPath: ./js.json
+    secrets:
+      apiKey: ${{ secrets.API_KEY }}
   p5:
     needs : initJob
     uses : ./.github/workflows/goscrap.yaml
     with:
       targetRepo: anuragkanwar/docus
+      sitemapPath: http://localhost:3000/sitemap.xml
+      configPath: ./js.json
+    secrets:
+      apiKey: ${{ secrets.API_KEY }}
   p6:
     needs : initJob
     uses : ./.github/workflows/goscrap.yaml
     with:
       targetRepo: anuragkanwar/docus
+      sitemapPath: http://localhost:3000/sitemap.xml
+      configPath: ./js.json
+    secrets:
+      apiKey: ${{ secrets.API_KEY }}
+
 
   final_job:
     needs : [p1, p2, p3, p4, p5, p6]
     uses : ./.github/workflows/goscrap.yaml
     with:
-      targetRepo : anuragkanwar/docus
+      targetRepo: anuragkanwar/docus
+      sitemapPath: http://localhost:3000/sitemap.xml
+      configPath: ./js.json
+    secrets:
+      apiKey: ${{ secrets.API_KEY }}

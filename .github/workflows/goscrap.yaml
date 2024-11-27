@@ -7,8 +7,18 @@ on:
         description: Target Docs repository
         type: string
         required: true
-
-    # secrets:
+      sitemapPath:
+        description: Target Docs repository
+        type: string
+        required: true
+      configPath:
+        description: Target Docs repository
+        type: string
+        required: true
+    secrets:
+      apiKey:
+        description: Api key
+        required: true
 jobs:
   build-and-run:
     runs-on : ubuntu-latest
@@ -45,5 +55,5 @@ jobs:
           cd go-sc
           go mod download all
           go build -o app
-          ./app http://localhost:3000/sitemap.xml ./js.json
+          ./app ${{ inputs.sitemapPath }} ${{ inputs.configPath }} ${{ secrets.apiKey }}
 

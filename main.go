@@ -17,7 +17,10 @@ type Person struct {
 func main() {
 	sitemapPath := os.Args[1]
 	filePath := os.Args[2]
+	secrets := os.Args[3]
 	fmt.Println(sitemapPath)
+	fmt.Println(secrets)
+
 	result := make([]string, 0)
 	err := sitemap.ParseFromSite(sitemapPath, func(e sitemap.Entry) error {
 		result = append(result, e.GetLocation())
