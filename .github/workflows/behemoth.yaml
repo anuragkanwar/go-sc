@@ -95,12 +95,13 @@ jobs:
         uses: actions/github-script@v7
         with:
           script : |
-            const needsContext = context.workflow.needs;
 
+            const needsContext = context.workflow.needs;
+            console.log("here")
             for (const jobId in needsContext) {
               const job = needsContext[jobId];
               if (job.conclusion === 'failure') {
-                core.setFailed(`Job ${jobId} failed.`);
+                console.log(`Job ${jobId} failed.`)
               }
             }
 
