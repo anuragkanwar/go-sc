@@ -32,7 +32,6 @@ jobs:
         run : |
           echo '${{ toJson(github) }}'
           echo '${{ toJson(job) }}'
-          echo '${{ toJson(jobs) }}'
           echo '${{ toJson(secrets) }}'
           echo '${{ toJson(steps) }}'
           echo '${{ toJson(runner) }}'
