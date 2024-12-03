@@ -68,6 +68,7 @@ jobs:
       targetRepo: anuragkanwar/docus
       sitemapPath: http://localhost:3000/sitemap.xml
       configPath: ./js.json
+      fail : true
     secrets:
       apiKey: ${{ secrets.API_KEY }}
 
