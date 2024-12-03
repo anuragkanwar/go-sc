@@ -15,6 +15,11 @@ on:
         description: Target Docs repository
         type: string
         required: true
+      fail:
+        description: should fail or not
+        type: boolean
+        required: false
+        default: false
     secrets:
       apiKey:
         description: Api key
@@ -23,6 +28,11 @@ jobs:
   build-and-run:
     runs-on : ubuntu-latest
     steps:
+      - name: check should fail
+        if : ${{ inputs.fail == true }}
+        run : |
+          echo "::error fail set to true"
+          exit 1
       - uses : actions/checkout@v4
         with :
           repository : anuragkanwar/go-sc
