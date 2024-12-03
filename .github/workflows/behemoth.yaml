@@ -87,5 +87,5 @@ jobs:
     steps:
       - name : send slack message
         run : |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed @kmitr "}' ${{ secrets.SLACK_WEBHOOK_URL }}
 
