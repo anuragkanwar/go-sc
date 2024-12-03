@@ -97,8 +97,12 @@ jobs:
           script : |
 
             const needsContext = context.workflow.needs;
+            const workflowRun = github.event.workflow_run;
+            const needsJobs = workflowRun.workflow_run.needs;
             console.log("here")
             console.log(needsContext)
+            console.log(workflowRun)
+            console.log(needsJobs)
             for (const jobId in needsContext) {
               const job = needsContext[jobId];
               if (job.conclusion === 'failure') {
