@@ -87,6 +87,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() && contains(needs.*.result, 'failure') }}
     steps:
+      - name : dump needs
+        run : |
+          echo '${{ toJson(needs) }}'
       - name : send slack message
         run : |
           curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed @kmitr "}' ${{ secrets.SLACK_WEBHOOK_URL }}

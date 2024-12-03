@@ -28,14 +28,6 @@ jobs:
   build-and-run:
     runs-on : ubuntu-latest
     steps:
-      - name : print contexts
-        run : |
-          echo '${{ toJson(github) }}'
-          echo '${{ toJson(job) }}'
-          echo '${{ toJson(secrets) }}'
-          echo '${{ toJson(steps) }}'
-          echo '${{ toJson(runner) }}'
-
       - name: check should fail
         if : ${{ inputs.fail == true }}
         run : |
