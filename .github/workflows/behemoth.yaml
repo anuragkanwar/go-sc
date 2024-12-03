@@ -91,6 +91,14 @@ jobs:
       - name : dump needs
         run : |
           echo '${{ toJson(needs) }}'
+      - name : custom script
+        uses: actions/github-script@v7
+        with:
+          script : |
+            let arr = JSON.parse(${{ toJson(needs) }})
+            for (const [key, value] of Object.entries(arr)){
+              console.log(`key : ${key}`, value : `${arr[key].result}`)
+            }
       - name : send slack message
         run : |
           curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed @kmitr "}' ${{ secrets.SLACK_WEBHOOK_URL }}
