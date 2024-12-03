@@ -95,7 +95,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script : |
-            let arr = JSON.parse(${{ toJson(needs) }})
+            let arr = ${{ needs }}
             for (const [key, value] of Object.entries(arr)) {
               console.log(`key : ${key}, value : ${arr[key].result}`)
             }
