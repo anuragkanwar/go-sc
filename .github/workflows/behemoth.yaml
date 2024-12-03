@@ -96,8 +96,8 @@ jobs:
         with:
           script : |
             let arr = JSON.parse(${{ toJson(needs) }})
-            for (const [key, value] of Object.entries(arr)){
-              console.log(`key : ${key}`, value : `${arr[key].result}`)
+            for (const [key, value] of Object.entries(arr)) {
+              console.log(`key : ${key}, value : ${arr[key].result}`)
             }
       - name : send slack message
         run : |
