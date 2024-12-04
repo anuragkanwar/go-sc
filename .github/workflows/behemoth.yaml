@@ -94,19 +94,18 @@ jobs:
       - name : custom script
         run: |
           echo "Checking for failed jobs..."
-          failed_jobs=""
-          for job in ${{ toJson(needs) }}; do
-            job_name=$(echo $job | jq -r '.name')
-            job_status=$(echo $job | jq -r '.result')
+          failed_jobs=$(echo '${{ needs }}' | jq -r 'to_entries | map(select(.value.result == "failure") | .key) | .[]')
 
-            if [ "$job_status" == "failure" ]; then
-              failed_jobs+="$job_name\n"
-            fi
-          done
+          echo $failed_jobs
+
+          Check if there are any failed jobs
           if [ -z "$failed_jobs" ]; then
             echo "No jobs failed."
           else
-            echo -e "Failed jobs:\n$failed_jobs"
+            echo "Failed jobs:"
+            for job in $failed_jobs; do
+              echo "- $job"
+            done
           fi
       - name : send slack message
         run : |
