@@ -46,6 +46,7 @@ jobs:
     needs: initJob
     uses : ./.github/workflows/goscrap.yaml
     with:
+      fail : true
       targetRepo: anuragkanwar/docus
       sitemapPath: http://localhost:3000/sitemap.xml
       configPath: ./js.json
@@ -77,6 +78,7 @@ jobs:
     needs : [p1, p2, p3, p4, p5, p6]
     uses : ./.github/workflows/goscrap.yaml
     with:
+      fail : true
       targetRepo: anuragkanwar/docus
       sitemapPath: http://localhost:3000/sitemap.xml
       configPath: ./js.json
@@ -102,9 +104,10 @@ jobs:
             echo "No jobs failed."
           else
             echo "Failed jobs:"
+            jobs=""
             for job in $failed_jobs; do
-              echo "- $job"
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed, job : '$job' failed to complete @kmitr "}' ${{ secrets.SLACK_WEBHOOK_URL }}
+              jobs="${jobs}, $job"
+            curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed, jobs : '$jobs' failed to complete @kmitr "}' ${{ secrets.SLACK_WEBHOOK_URL }}
             done
           fi
 
