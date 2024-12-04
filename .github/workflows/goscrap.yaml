@@ -60,11 +60,12 @@ jobs:
           go-version: '1.23.3'
       - run: go version
 
-      - name: Build and Run Go Server
+      - name: Build Go server
         run: |
-          set -e
           cd go-sc
           go mod download all
           go build -o app
-          ./app ${{ inputs.sitemapPath }} ${{ inputs.configPath }} ${{ secrets.apiKey }}
+
+      - name : Run Go server
+        run : ./app ${{ inputs.sitemapPath }} ${{ inputs.configPath }} ${{ secrets.apiKey }}
 
