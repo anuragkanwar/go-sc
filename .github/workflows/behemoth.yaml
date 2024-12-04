@@ -97,8 +97,12 @@ jobs:
         run: |
           echo "Checking for failed jobs..."
           failed_jobs=$(echo '${{ toJson(needs) }}' | jq -r 'to_entries | map(select(.value.result == "failure") | .key) | .[]')
+          repo_name=$(echo '${{ toJson(github) }})' | jq '.repository'
+          repo_link=$(echo '${{ toJson(github) }})' | jq '.events.repository.html_url'
 
           echo $failed_jobs
+          echo $repo_name
+          echo $repo_link
 
           if [ -z "$failed_jobs" ]; then
             echo "No jobs failed."
@@ -112,5 +116,5 @@ jobs:
             msg+=$jobs
             msg+=' \n\n", "emoji": true } }, { "type": "context", "elements": [ { "type": "image", "image_url": "https://slack-imgs.com/?c=1&o1=wi32.he32.si&url=https%3A%2F%2Fslack.github.com%2Fstatic%2Fimg%2Ffavicon-neutral.png", "alt_text": "cute cat" }, { "type": "plain_text", "text": "Author: K A Applegate", "emoji": true } ] } ] }'
             echo $msg
-            curl -X POST -H 'Content-type: application/json' --data "$msg" https://hooks.slack.com/services/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
+            curl -X POST -H 'Content-type: application/json' --data "$msg" ${{ secrets.SLACK_WEBHOOK_URL }}
           fi
