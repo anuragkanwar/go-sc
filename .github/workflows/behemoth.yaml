@@ -92,12 +92,22 @@ jobs:
         run : |
           echo '${{ toJson(needs) }}'
       - name : custom script
-        uses: actions/github-script@v7
-        with:
-          script : |
-            const val = "${{ needs }}"
-            console.log(val)
+        run: |
+          echo "Checking for failed jobs..."
+          failed_jobs=""
+          for job in ${{ toJson(needs) }}; do
+            job_name=$(echo $job | jq -r '.name')
+            job_status=$(echo $job | jq -r '.result')
 
+            if [ "$job_status" == "failure" ]; then
+              failed_jobs+="$job_name\n"
+            fi
+          done
+          if [ -z "$failed_jobs" ]; then
+            echo "No jobs failed."
+          else
+            echo -e "Failed jobs:\n$failed_jobs"
+          fi
       - name : send slack message
         run : |
           curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed @kmitr "}' ${{ secrets.SLACK_WEBHOOK_URL }}
