@@ -106,8 +106,8 @@ jobs:
             echo "Failed jobs:"
             jobs=""
             for job in $failed_jobs; do
-              jobs="${jobs}, $job"
-            curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed, jobs : '$jobs' failed to complete @kmitr "}' ${{ secrets.SLACK_WEBHOOK_URL }}
+              jobs="$jobs, $job"
             done
+            curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed, jobs : '$jobs' failed to complete @kmitr "}' ${{ secrets.SLACK_WEBHOOK_URL }}
           fi
 
