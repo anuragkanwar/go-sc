@@ -94,7 +94,7 @@ jobs:
       - name : custom script
         run: |
           echo "Checking for failed jobs..."
-          failed_jobs=$(echo '${{ needs }}' | jq -r 'to_entries | map(select(.value.result == "failure") | .key) | .[]')
+          failed_jobs=$(echo '${{ toJson(needs) }}' | jq -r 'to_entries | map(select(.value.result == "failure") | .key) | .[]')
 
           echo $failed_jobs
 
