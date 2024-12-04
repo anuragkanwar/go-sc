@@ -97,8 +97,8 @@ jobs:
         run: |
           echo "Checking for failed jobs..."
           failed_jobs=$(echo '${{ toJson(needs) }}' | jq -r 'to_entries | map(select(.value.result == "failure") | .key) | .[]')
-          repo_name=$(echo '${{ toJson(github) }})' | jq '.repository'
-          repo_link=$(echo '${{ toJson(github) }})' | jq '.events.repository.html_url'
+          repo_name=$(echo '${{ toJson(github) }}' | jq '.repository' )
+          repo_link=$(echo '${{ toJson(github) }}' | jq '.events.repository.html_url' )
 
           echo $failed_jobs
           echo $repo_name
