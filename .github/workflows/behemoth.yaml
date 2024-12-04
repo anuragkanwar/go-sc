@@ -98,7 +98,6 @@ jobs:
 
           echo $failed_jobs
 
-          Check if there are any failed jobs
           if [ -z "$failed_jobs" ]; then
             echo "No jobs failed."
           else
