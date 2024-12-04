@@ -51,10 +51,9 @@ jobs:
         run: |
           ls
           cd docus
-          bat sad
-          npm install
-          npm run build
-          npm run serve --no-open &
+          # npm install
+          # npm run build
+          # npm run serve --no-open &
       - name : Go
         uses: "actions/setup-go@v5"
         with:
