@@ -92,7 +92,7 @@ jobs:
     steps:
       - name : dump needs
         run : |
-          echo '${{ toJson(needs) }}'
+          echo '${{ toJson(github) }}'
       - name : custom script
         run: |
           echo "Checking for failed jobs..."
@@ -103,11 +103,14 @@ jobs:
           if [ -z "$failed_jobs" ]; then
             echo "No jobs failed."
           else
-            echo "Failed jobs:"
+            msg='{ "blocks": [ { "type": "header", "text": { "type": "plain_text", "text": ":bangbang: Crawler Workflow Failed :bangbang:", "emoji": true } }, { "type": "section", "text": { "type": "plain_text", "text": "One or more jobs have failed :skull::skull: \n\nJob names: '
             jobs=""
             for job in $failed_jobs; do
-              jobs="$jobs, $job"
+              jobs+=$job
+              jobs+=", "
             done
-            curl -X POST -H 'Content-type: application/json' --data '{"text":"workflow failed, jobs : '$jobs' failed to complete @kmitr "}' ${{ secrets.SLACK_WEBHOOK_URL }}
+            msg+=$jobs
+            msg+=' \n\n", "emoji": true } }, { "type": "context", "elements": [ { "type": "image", "image_url": "https://slack-imgs.com/?c=1&o1=wi32.he32.si&url=https%3A%2F%2Fslack.github.com%2Fstatic%2Fimg%2Ffavicon-neutral.png", "alt_text": "cute cat" }, { "type": "plain_text", "text": "Author: K A Applegate", "emoji": true } ] } ] }'
+            echo $msg
+            curl -X POST -H 'Content-type: application/json' --data "$msg" https://hooks.slack.com/services/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
           fi
-
