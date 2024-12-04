@@ -67,5 +67,7 @@ jobs:
           go build -o app
 
       - name : Run Go server
-        run : ./app ${{ inputs.sitemapPath }} ${{ inputs.configPath }} ${{ secrets.apiKey }}
+        run : |
+          cd go-sc
+          ./app ${{ inputs.sitemapPath }} ${{ inputs.configPath }} ${{ secrets.apiKey }}
 
