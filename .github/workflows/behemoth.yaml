@@ -119,5 +119,5 @@ jobs:
             msg+=' | '
             msg+=$repo_name
             msg+='>" } ] } ] }'
-            curl -X POST -H 'Content-type: application/json' --data  '{"text":"Hello, World!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+            curl -X POST -H 'Content-type: application/json' --data "$msg" ${{ secrets.SLACK_WEBHOOK_URL }}
           fi
