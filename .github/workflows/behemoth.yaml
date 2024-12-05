@@ -100,7 +100,7 @@ jobs:
           repo_name=$(echo '${{ toJson(github) }}' | jq -r '.repository' )
           repo_link=$(echo '${{ toJson(github) }}' | jq -r '.event.repository.html_url' )
           run_id=$(echo '${{ toJson(github) }}' | jq -r '.run_id' ) 
-          repo_link+="/actions/run/"
+          repo_link+="/actions/runs/"
           repo_link+=$run_id
           echo $failed_jobs
           echo $repo_name
