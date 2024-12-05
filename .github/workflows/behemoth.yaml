@@ -114,7 +114,10 @@ jobs:
               jobs+=", "
             done
             msg+=$jobs
-            msg+=' \n\n", "emoji": true } }, { "type": "context", "elements": [ { "type": "image", "image_url": "https://slack-imgs.com/?c=1&o1=wi32.he32.si&url=https%3A%2F%2Fslack.github.com%2Fstatic%2Fimg%2Ffavicon-neutral.png", "alt_text": "cute cat" }, { "type": "mrkdwn", "text": "<https://google.com | Google>" } ] } ] }'
-            echo $msg
-            curl -X POST -H 'Content-type: application/json' --data  "$msg"  ${{ secrets.SLACK_WEBHOOK_URL }}
+            msg+=' \n\n", "emoji": true } }, { "type": "context", "elements": [ { "type": "image", "image_url": "https://slack-imgs.com/?c=1&o1=wi32.he32.si&url=https%3A%2F%2Fslack.github.com%2Fstatic%2Fimg%2Ffavicon-neutral.png", "alt_text": "cute cat" }, { "type": "mrkdwn", "text": "<'
+            msg+=$repo_link
+            msg+=' | '
+            msg+=$repo_name
+            msg+='>" } ] } ] }'
+            curl -X POST -H 'Content-type: application/json' --data  '{"text":"Hello, World!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
           fi
