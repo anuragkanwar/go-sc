@@ -1,125 +1,239 @@
-name : Main Workflow
+name: Checkup Final
+
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      buildError1:
+        description: ""
+        type: boolean
+        required: false
+        default: false
+      buildError2:
+        description: ""
+        type: boolean
+        required: false
+        default: false
+      AlgoliaError1:
+        description: ""
+        type: boolean
+        required: false
+        default: false
+      AlgoliaError2:
+        description: ""
+        type: boolean
+        required: false
+        default: false
 
 jobs:
-  initJob:
-    uses : ./.github/workflows/goscrap.yaml
+  appsec-android-native-job:
+    uses: ./.github/workflows/reuseable_workflow.yaml
     with:
-      targetRepo: anuragkanwar/docus
-      sitemapPath: http://localhost:3000/sitemap.xml
-      configPath: ./js.json
-    secrets:
-      apiKey: ${{ secrets.API_KEY }}
+      ibe: ${{ inputs.buildError1 }}
+      iae: false
+      targetRepo: digital-ai/docs-appsec-android-native # Use actual repo name
+        # secrets: inherit
 
-  p1:
-    needs: initJob
-    uses : ./.github/workflows/goscrap.yaml
+  deploy-job:
+    uses: ./.github/workflows/reuseable_workflow.yaml
     with:
-      targetRepo: anuragkanwar/docus
-      sitemapPath: http://localhost:3000/sitemap.xml
-      configPath: ./js.json
-    secrets:
-      apiKey: ${{ secrets.API_KEY }}
-  p2:
-    needs : initJob
-    uses : ./.github/workflows/goscrap.yaml
-    with:
-      targetRepo: anuragkanwar/docus
-      sitemapPath: http://localhost:3000/sitemap.xml
-      configPath: ./js.json
-    secrets:
-      apiKey: ${{ secrets.API_KEY }}
-  p3:
-    needs : initJob
-    uses : ./.github/workflows/goscrap.yaml
-    with:
-      targetRepo: anuragkanwar/docus
-      sitemapPath: http://localhost:3000/sitemap.xml
-      configPath: ./js.json
-    secrets:
-      apiKey: ${{ secrets.API_KEY }}
-  p4:
-    needs: initJob
-    uses : ./.github/workflows/goscrap.yaml
-    with:
-      fail : true
-      targetRepo: anuragkanwar/docus
-      sitemapPath: http://localhost:3000/sitemap.xml
-      configPath: ./js.json
+      ibe: false
+      iae: ${{ inputs.AlgoliaError1 }}
+      targetRepo: digital-ai/docs-deploy # Use actual repo name
 
-    secrets:
-      apiKey: ${{ secrets.API_KEY }}
-  p5:
-    needs : initJob
-    uses : ./.github/workflows/goscrap.yaml
+  release-job:
+    uses: ./.github/workflows/reuseable_workflow.yaml
     with:
-      targetRepo: anuragkanwar/docus
-      sitemapPath: http://localhost:3000/sitemap.xml
-      configPath: ./js.json
-    secrets:
-      apiKey: ${{ secrets.API_KEY }}
-  p6:
-    needs : initJob
-    uses : ./.github/workflows/goscrap.yaml
+      ibe: ${{ inputs.buildError2 }}
+      iae: ${{ inputs.AlgoliaError1 }}
+      targetRepo: digital-ai/docs-release # Use actual repo name
+
+  platform-job:
+    uses: ./.github/workflows/reuseable_workflow.yaml
     with:
-      targetRepo: anuragkanwar/docus
-      sitemapPath: http://localhost:3000/sitemap.xml
-      configPath: ./js.json
-      fail : true
-    secrets:
-      apiKey: ${{ secrets.API_KEY }}
+      ibe: false
+      iae: false
+      targetRepo: digital-ai/docs-platform # Use actual repo name
 
-
-  final_job:
-    needs : [p1, p2, p3, p4, p5, p6]
-    uses : ./.github/workflows/goscrap.yaml
+  appsec-final-job:
+    uses: ./.github/workflows/reuseable_workflow.yaml
     with:
-      fail : true
-      targetRepo: anuragkanwar/docus
-      sitemapPath: http://localhost:3000/sitemap.xml
-      configPath: ./js.json
-    secrets:
-      apiKey: ${{ secrets.API_KEY }}
-
-  notify_job:
-    needs: [initJob, p1, p2, p3, p4, p5, p6, final_job]
+      ibe: false
+      iae: ${{ inputs.AlgoliaError1 }}
+      targetRepo: digital-ai/docs-appsec-final # Use actual repo name
+  
+  check_failures:
+    name: Check Failures and Notify
     runs-on: ubuntu-latest
-    if: ${{ always() && contains(needs.*.result, 'failure') }}
-    steps:
-      - name : dump needs
-        run : |
-          echo '${{ toJson(github) }}'
-      - name : custom script
-        run: |
-          echo "Checking for failed jobs..."
-          failed_jobs=$(echo '${{ toJson(needs) }}' | jq -r 'to_entries | map(select(.value.result == "failure") | .key) | .[]')
-          repo_name=$(echo '${{ toJson(github) }}' | jq -r '.repository' )
-          repo_link=$(echo '${{ toJson(github) }}' | jq -r '.event.repository.html_url' )
-          run_id=$(echo '${{ toJson(github) }}' | jq -r '.run_id' ) 
-          repo_link+="/actions/runs/"
-          repo_link+=$run_id
-          echo $failed_jobs
-          echo $repo_name
-          echo $repo_link
+    if: always()
+    needs:
+      - appsec-android-native-job # Depends on initial job
+      - deploy-job  # Depends on all middle jobs
+      - release-job
+      - platform-job  
+      - appsec-final-job # Depends on final job
+      # Add all other middle job IDs here
 
-          if [ -z "$failed_jobs" ]; then
-            echo "No jobs failed."
-          else
-            msg='{ "blocks": [ { "type": "header", "text": { "type": "plain_text", "text": ":bangbang: Crawler Workflow Failed :bangbang:", "emoji": true } }, { "type": "section", "text": { "type": "plain_text", "text": "One or more jobs have failed :skull::skull: \n\nJob names: '
-            jobs=""
-            for job in $failed_jobs; do
-              jobs+=$job
-              jobs+=", "
-            done
-            msg+=$jobs
-            msg+=' \n\n", "emoji": true } }, { "type": "context", "elements": [ { "type": "image", "image_url": "https://slack-imgs.com/?c=1&o1=wi32.he32.si&url=https%3A%2F%2Fslack.github.com%2Fstatic%2Fimg%2Ffavicon-neutral.png", "alt_text": "cute cat" }, { "type": "mrkdwn", "text": "<'
-            msg+=$repo_link
-            msg+=' | '
-            msg+=$repo_name
-            msg+='>" } ] } ] }'
-            curl -X POST -H 'Content-type: application/json' --data "$msg" ${{ secrets.SLACK_WEBHOOK_URL }}
-          fi
+    steps:
+      - name: Aggregate Job Results
+        id: aggregate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const needs_context = ${{ toJson(needs) }};
+            const github_context = ${{ toJson(github) }};
+            console.log("Needs Context:", JSON.stringify(needs_context, null, 2));
+
+            let build_failures = [];
+            let algolia_failures = [];
+            let skipped_jobs = [];
+            let unknown_failures = [];
+            let has_issues = false; // Use a broader term than just 'failures'
+
+            const job_ids = Object.keys(needs_context);
+
+            for (const job_id of job_ids) {
+              const job_result = needs_context[job_id];
+              const repo_name = job_id; // Get repo name from map
+
+              // Check job status: failure, skipped, cancelled, etc. (exclude success)
+              if (job_result.result !== 'success') {
+                has_issues = true;
+                console.log(`Issue detected for Job ID: ${job_id} (Repo: ${repo_name}). Result: ${job_result.result}`);
+
+                if (job_result.result === 'skipped') {
+                  skipped_jobs.push(`${repo_name} (Skipped - likely upstream failure)`);
+                } else if (job_result.result === 'failure') {
+                  // Job ran but failed, check its output status
+                  const status = job_result.outputs?.status; // Use optional chaining ?.
+                  if (status === 'build_failure') {
+                    build_failures.push(repo_name);
+                  } else if (status === 'algolia_failure') {
+                    algolia_failures.push(repo_name);
+                  } else {
+                    // Failure occurred, but status wasn't set or recognized
+                    unknown_failures.push(`${repo_name} (Job Failed - Status: ${status || 'N/A'})`);
+                  }
+                } else {
+                  // Handle other non-success states like 'cancelled' if necessary
+                   unknown_failures.push(`${repo_name} (Job State: ${job_result.result})`);
+                }
+              } else {
+                 console.log(`Job ${job_id} (Repo: ${repo_name}) completed successfully.`);
+              }
+            }
+
+            // ###############################################################################
+
+                        // --- Construct Slack Block Kit Payload ---
+            let slackPayload = {};
+            const workflowRunUrl = `${github_context.server_url}/${github_context.repository}/actions/runs/${github_context.run_id}`;
+
+            if (!has_issues) {
+              // SUCCESS PAYLOAD
+              slackPayload = {
+                blocks: [
+                  {
+                    "type": "header",
+                    "text": { "type": "plain_text", "text": ":white_check_mark::white_check_mark: Crawler Workflow Passed :white_check_mark::white_check_mark:", "emoji": true }
+                  },
+                  {
+                    "type": "section",
+                    "text": { "type": "mrkdwn", "text": "All documentation repositories were processed successfully by the Algolia crawler. :rocket:" }
+                  },
+                  {
+                    "type": "context",
+                    "elements": [
+                      { "type": "mrkdwn", "text": `Workflow Run: <${workflowRunUrl}|View Run>` },
+                      { "type": "mrkdwn", "text": `*Triggered:* ${github_context.event_name} by ${github_context.actor}` }
+                    ]
+                  }
+                ]
+              };
+              console.log("All jobs succeeded. Generating success payload.");
+            } else {
+              // FAILURE/ISSUES PAYLOAD
+              let blocks = [
+                {
+                  "type": "header",
+                  "text": { "type": "plain_text", "text": ":bangbang: Crawler Workflow Failed :bangbang:", "emoji": true }
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    { "type": "mrkdwn", "text": `Workflow Run: <${workflowRunUrl}|View Run Logs for Details>` },
+                    { "type": "mrkdwn", "text": `*Triggered:* ${github_context.event_name} by ${github_context.actor}` }
+                  ]
+                },
+                { "type": "divider" }
+              ];
+
+              // Helper function to create list sections for Block Kit
+              const createListSection = (title, items) => {
+                if (!items || items.length === 0) return [];
+                // Format items: "- item1\n- item2" inside a code block
+                const formattedItems = "```\n- " + items.join('\n- ') + "\n```";
+                return [
+                  { "type": "section", "text": { "type": "mrkdwn", "text": title } },
+                  { "type": "section", "text": { "type": "mrkdwn", "text": formattedItems } }
+                ];
+              };
+
+              // Conditionally add failure sections
+              blocks = blocks.concat(createListSection("*🏗️ Build Failures Encountered:*", build_failures));
+              blocks = blocks.concat(createListSection("*🕸️ Algolia Crawler Failures (Check logs for 'panic:'/connection issues):*", algolia_failures));
+              blocks = blocks.concat(createListSection("*⏭️ Skipped Jobs (Did not run due to upstream failure):*", skipped_jobs));
+              blocks = blocks.concat(createListSection("*❓ Unknown / Other Issues:*", unknown_failures));
+
+              // Add final divider and footer
+              blocks.push({ "type": "divider" });
+              blocks.push({ "type": "section", "text": { "type": "mrkdwn", "text": "Please review the workflow logs for detailed error messages.\n>If after checking if issues are due to Algolia connection, please rerun the job by selecting `Re-run only failed jobs`" } });
+
+              slackPayload = { blocks };
+              console.log("Issues detected. Generating failure payload.");
+            }
+
+            // --- Set Outputs ---
+            const payloadString = JSON.stringify(slackPayload);
+            // Log payload for debugging in workflow logs (optional)
+            // console.log("Generated Slack Payload String:", payloadString);
+
+            // Set the output for the Slack action step
+            core.setOutput('slack_payload', payloadString);
+            // Keep has_issues output if needed for the 'if' condition on the Slack step
+            core.setOutput('has_issues', has_issues.toString());
+
+            // ###############################################################################
+
+            let slack_message = "";
+            if (has_issues) {
+              slack_message += `*GitHub Actions: Doc Crawl Workflow completed with issues* :warning:\n`;
+              slack_message += `Workflow Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\n`;
+
+              if (build_failures.length > 0) {
+                slack_message += `*Build Failures* :x::\n - ${build_failures.join('\n - ')}\n\n`;
+              }
+              if (algolia_failures.length > 0) {
+                slack_message += `*Algolia Crawler Failures* (Check logs for 'panic:' or connection issues) :spider_web::\n - ${algolia_failures.join('\n - ')}\n\n`;
+              }
+               if (skipped_jobs.length > 0) {
+                slack_message += `*Skipped Jobs* (Did not run due to upstream failure) :next_track_button::\n - ${skipped_jobs.join('\n - ')}\n\n`;
+              }
+              if (unknown_failures.length > 0) {
+                 slack_message += `*Unknown/Other Issues* :question::\n - ${unknown_failures.join('\n - ')}\n\n`;
+              }
+            } else {
+               console.log("All jobs completed successfully.");
+               // Optionally send a success message or take no action
+               slack_message = "*GitHub Actions: Doc Crawl Workflow completed successfully* :white_check_mark:";
+            }
+
+            // core.setOutput('slack_message', slack_message);
+            // Output true if there were *any* issues (failures or skips)
+            // core.setOutput('has_issues', has_issues.toString());
+
+      - name: Send Slack Notification on Issues
+        if: steps.aggregate.outputs.has_issues == 'true'
+        run: |
+          echo '${{ steps.aggregate.outputs.has_issues }}'
+          echo '${{ steps.aggregate.outputs.slack_payload }}'
+          curl -X POST -H 'Content-type: application/json' --data "${{ steps.aggregate.outputs.slack_payload }}" ${{ secrets.SLACK_WEBHOOK_URL }}

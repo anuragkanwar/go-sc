@@ -1,73 +1,104 @@
-name : Run Go and Docusaurus
+name: Reusable Docs Build and Crawl
 
 on:
   workflow_call:
     inputs:
+      ibe:
+        type: boolean
+        required: true
+      iae:
+        type: boolean
+        required: true
       targetRepo:
         description: Target Docs repository
         type: string
         required: true
-      sitemapPath:
-        description: Target Docs repository
-        type: string
-        required: true
-      configPath:
-        description: Target Docs repository
-        type: string
-        required: true
-      fail:
-        description: should fail or not
-        type: boolean
-        required: false
-        default: false
-    secrets:
-      apiKey:
-        description: Api key
-        required: true
+    outputs:
+      status:
+        description: "The status of the process: success, build_failure, algolia_failure"
+        value: ${{ jobs.build_and_crawl.outputs.outcome }}
+      error_log:
+        description: "A snippet of the error log if failure occurred"
+        value: ${{ jobs.build_and_crawl.outputs.error_details }}
+
 jobs:
-  build-and-run:
-    runs-on : ubuntu-latest
+  build_and_crawl:
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.set_status.outputs.status }}
+      error_details: ${{ steps.set_status.outputs.error_log }}
     steps:
-      - name: check should fail
-        if : ${{ inputs.fail == true }}
-        run : |
-          echo "::error fail set to true"
-          exit 1
-      - uses : actions/checkout@v4
-        with :
-          repository : anuragkanwar/go-sc
-          fetch-depth : 0
-          path : "./go-sc"
-      - uses: actions/checkout@v4
-        with :
-          repository : ${{ inputs.targetRepo }}
-          fetch-depth : 0
-          path : "./docus"
-      - name : Node
-        uses : actions/setup-node@v4
-        with :
-          node-version: "20"
-      - name: Build and Run React App
+      # NO checkout step needed here usually
+
+      - name: Build Documentation # Step 1
+        id: build
+        # continue-on-error: true # Add if needed
         run: |
-          ls
-          cd docus
-          # npm install
-          # npm run build
-          # npm run serve --no-open &
-      - name : Go
-        uses: "actions/setup-go@v5"
-        with:
-          go-version: '1.23.3'
-      - run: go version
+          # Your ACTUAL build commands here...
+          # Example placeholder logic (corrected syntax)
+          if [[ "${{ inputs.ibe }}" == "true" ]]; then
+            echo "Error: Build failed based on input." >&2
+            exit 1 # Make sure step fails if needed
+          else
+            echo "Build Success placeholder"
+          fi
 
-      - name: Build Go server
+      - name: Run Algolia Crawler # Step 2 - SAME indentation level as Build
+        id: crawl
+        # if: steps.build.outcome == 'success' # Add condition if needed
+        # continue-on-error: true # Add if needed
         run: |
-          cd go-sc
-          go mod download all
-          go build -o app
+          # Your ACTUAL crawler commands here...
+          # Example placeholder logic (corrected syntax)
+          if [[ "${{ inputs.iae }}" == "true" ]]; then # Use iae input?
+            echo "panic: Algolia failed based on input." >&2
+            # Make sure 'panic:' output can be captured if needed by Set Status
+            exit 1 # Make sure step fails if needed
+          else
+            echo "Crawl Success placeholder"
+          fi
 
-      - name : Run Go server
-        run : |
-          cd go-sc
-          ./app ${{ inputs.sitemapPath }} ${{ inputs.configPath }} ${{ secrets.apiKey }}
+      - name: Set Final Status # Step 3 - SAME indentation level as Build/Crawl
+        id: set_status
+        if: always() # Ensure this runs even if prior steps fail (if needed)
+        run: |
+          STATUS="unknown"
+          ERROR_LOG="No specific error captured."
 
+          # --- IMPORTANT ---
+          # This logic depends on the build/crawl steps having outcomes
+          # and potentially creating logs (like crawl_output.log).
+          # Adjust based on your *actual* build/crawl commands.
+          # ---
+
+          if [[ "${{ steps.build.outcome }}" == 'failure' ]]; then
+            STATUS="build_failure"
+            ERROR_LOG="Documentation build failed for ${{ inputs.targetRepo }}."
+            echo "Build failure detected."
+          elif [[ "${{ steps.crawl.outcome }}" == 'failure' ]]; then
+            echo "Crawl step failed. Checking logs..."
+            # Replace log check with actual method if needed
+            if echo "${{ steps.crawl.outputs.stderr }}" | grep -q "panic:"; then
+               STATUS="algolia_failure"
+               ERROR_LOG=$(echo "${{ steps.crawl.outputs.stderr }}" | grep "panic:" | head -n 1)
+               echo "Algolia failure (panic) detected."
+            else
+               STATUS="algolia_failure"
+               ERROR_LOG="Generic crawl failure for ${{ inputs.targetRepo }}" # Add more detail?
+               echo "Generic crawl failure detected."
+            fi
+          elif [[ "${{ steps.build.outcome }}" == 'success' && "${{ steps.crawl.outcome }}" == 'success' ]]; then
+            STATUS="success"
+            echo "Build and Crawl successful."
+          else
+             STATUS="unknown_failure"
+             ERROR_LOG="Unexpected state. Build: ${{ steps.build.outcome }}, Crawl: ${{ steps.crawl.outcome }}"
+             echo "Unknown failure state."
+          fi
+
+          # Escape output...
+          ERROR_LOG="${ERROR_LOG//'%'/'%25'}"
+          ERROR_LOG="${ERROR_LOG//$'\n'/'%0A'}"
+          ERROR_LOG="${ERROR_LOG//$'\r'/'%0D'}"
+          echo "status=${STATUS}" >> $GITHUB_OUTPUT
+          echo "error_log=${ERROR_LOG}" >> $GITHUB_OUTPUT
