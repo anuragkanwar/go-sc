@@ -186,7 +186,7 @@ jobs:
 
               // Add final divider and footer
               blocks.push({ "type": "divider" });
-              blocks.push({ "type": "section", "text": { "type": "mrkdwn", "text": "Please review the workflow logs for detailed error messages.\n>If after checking if issues are due to Algolia connection, please rerun the job by selecting `Re-run only failed jobs`" } });
+              blocks.push({ "type": "section", "text": { "type": "mrkdwn", "text": "Please review the workflow logs for detailed error messages.\n>After checking, if the issues appear to be due to an Algolia connection problem, please rerun the workflow by selecting `Re-run only failed jobs`." } });
 
               slackPayload = { blocks };
               console.log("Issues detected. Generating failure payload.");
